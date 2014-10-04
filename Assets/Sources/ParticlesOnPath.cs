@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Security.AccessControl;
 using Assets.Plugins.radical.System;
 using UnityEngine;
 
@@ -9,6 +8,7 @@ namespace Assets.Sources
 
         public Transform[] ControlPoints;
         private ParticleSystem ps;
+        public bool Gizmos = false;
 
         public void Awake()
         {
@@ -17,12 +17,13 @@ namespace Assets.Sources
 
         public void OnDrawGizmos()
         {
-            ps.UpdateParticles(particle =>
-            {
-                var percent = 1 - particle.lifetime / particle.startLifetime;
-                Spline.GizmoDraw(ControlPoints, percent);
-                return particle;
-            }); 
+            if(Gizmos)
+                ps.UpdateParticles(particle =>
+                {
+                    var percent = 1 - particle.lifetime / particle.startLifetime;
+                    Spline.GizmoDraw(ControlPoints, percent);
+                    return particle;
+                }); 
         }
 
         public void LateUpdate()
@@ -31,6 +32,7 @@ namespace Assets.Sources
             {
                 var percent = 1- particle.lifetime/particle.startLifetime;
                 particle.position = Spline.InterpConstantSpeed(ControlPoints, percent);
+                
                 return particle;
             }); 
         }
