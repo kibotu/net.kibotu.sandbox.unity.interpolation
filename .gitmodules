@@ -1,0 +1,3 @@
+[submodule "Assets/Promises-CSharp"]
+	path = Assets/Promises-CSharp
+	url = https://github.com/kibotu/Promises-CSharp.git
