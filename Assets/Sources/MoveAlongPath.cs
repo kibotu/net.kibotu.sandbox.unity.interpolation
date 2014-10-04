@@ -16,11 +16,6 @@ namespace Assets.Sources
         public Transform Target;
         private Promise<Vector3> _promise;
 
-        private void Start()
-        {
-//            IEnumerator<Vector3> sequence = Interpolate.New[Ease | Bezier | CatmulRom](configuration).GetEnumerator();
-        }
-
         private IEnumerator<Vector3> GetSequence()
         {
             return (IEnumerator<Vector3>)Interpolate.NewEase(Interpolate.Ease(EaseType), Beginning.position, End.transform.position, Duration);
