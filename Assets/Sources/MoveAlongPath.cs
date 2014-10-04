@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
+using Assets.Promises;
 using UnityEngine;
 
 namespace Assets.Sources
@@ -9,19 +9,16 @@ namespace Assets.Sources
     {
         public Transform Beginning;
         public Transform End;
-        private IEnumerator<Vector3> _sequence;
-        private IEnumerator<Vector3> _reverseSequence;
         public float Duration;
-        public Interpolate.EaseType EaseType = Interpolate.EaseType.Linear;
+        public Interpolate.EaseType EaseType = Interpolate.EaseType.EaseInOutSine;
         public bool Loop = false;
-        public bool Test = false;
-        public event Action<MoveAlongPath> OnComplete;
+        public bool Reverse = false;
         public Transform Target;
+        private Promise<Vector3> _promise;
 
         private void Start()
         {
 //            IEnumerator<Vector3> sequence = Interpolate.New[Ease | Bezier | CatmulRom](configuration).GetEnumerator();
-            _sequence = GetSequence();
         }
 
         private IEnumerator<Vector3> GetSequence()
@@ -34,42 +31,40 @@ namespace Assets.Sources
             return (IEnumerator<Vector3>)Interpolate.NewEase(Interpolate.Ease(EaseType), End.position, Beginning.transform.position, Duration);
         }
 
-        private void Update()
-        {
-            if (Test)
-            {
-                Test = false;
-                StopCoroutine("Move");
-                StartCoroutine(Move());
-            }
-        }
-
         private IEnumerator Move()
         {
-            while (_sequence.MoveNext())
+            var sequence = GetSequence();
+            while (sequence.MoveNext())
             {
-                Target.position = _sequence.Current;
+                Target.position = sequence.Current;
+                yield return new WaitForEndOfFrame();
             }
-            else
-            {
-                if (OnComplete != null) OnComplete(this);
-                if (!Loop) { yield break; }
-                if (_reverseSequence == null) _reverseSequence = GetReverseSequence();
-                if (_reverseSequence.MoveNext())
-                    Target.position = _reverseSequence.Current;
-                else
-                {
-                    if (OnComplete != null) OnComplete(this);
-                    _sequence = GetSequence();
-                    _reverseSequence = GetReverseSequence();
-                }
-            }
-            yield return new WaitForEndOfFrame();
         }
 
-        private void Complete()
+        private IEnumerator MoveReversed()
         {
-            OnComplete(this);
+            var sequence = GetReverseSequence();
+            while (sequence.MoveNext())
+            {
+                Target.position = sequence.Current;
+                yield return new WaitForEndOfFrame();
+            }
+        }
+
+        public Promise<Vector3> LoopMoving()
+        {
+            var promise = Promise.WithCoroutine<Vector3>(Move());
+            if (Reverse)
+                promise.OnFulfilled += result =>
+                {
+                    var promise2 = Promise.WithCoroutine<Vector3>(MoveReversed());
+                    if (Loop) promise2.OnFulfilled += vector3 => LoopMoving();
+                };
+            else
+            {
+                if (Loop) promise.OnFulfilled += result => LoopMoving();
+            }
+            return promise;
         }
     }
 }

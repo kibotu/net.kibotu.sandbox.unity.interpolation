@@ -65,27 +65,50 @@ namespace Assets.Sources
         public enum EaseType
         {
             Linear,
+            // quad
             EaseInQuad,
             EaseOutQuad,
             EaseInOutQuad,
+            // cubic
             EaseInCubic,
             EaseOutCubic,
             EaseInOutCubic,
+            // quart
             EaseInQuart,
             EaseOutQuart,
             EaseInOutQuart,
+            // quint
             EaseInQuint,
             EaseOutQuint,
             EaseInOutQuint,
+            // sin
             EaseInSine,
             EaseOutSine,
             EaseInOutSine,
+            // exp
             EaseInExpo,
             EaseOutExpo,
             EaseInOutExpo,
+            // circ
             EaseInCirc,
             EaseOutCirc,
-            EaseInOutCirc
+            EaseInOutCirc,
+            //spring
+            spring,
+		    //bounce,
+		    easeInBounce,
+		    easeOutBounce,
+		    easeInOutBounce,
+            // back
+		    easeInBack,
+		    easeOutBack,
+		    easeInOutBack,
+		    //elastic,
+		    easeInElastic,
+		    easeOutElastic,
+		    easeInOutElastic,
+            // punch
+		    punch
         }
 
         /**
@@ -276,8 +299,81 @@ namespace Assets.Sources
                 case EaseType.EaseInOutCirc:
                     f = EaseInOutCirc;
                     break;
+//                case EaseType.spring:
+//                    f = EaseSpring;
+//                    break;
+//                case EaseType.easeInBounce:
+//                    f = EaseInBounce;
+//                    break;
+//                case EaseType.easeOutBounce:
+//                    f = EaseOutBounce;
+//                    break;
+                case EaseType.easeInOutBounce:
+                    f = EaseInOutBounce;
+                    break;
+//                case EaseType.easeInBack:
+//                    f = EaseInBack;
+//                    break;
+//                case EaseType.easeOutBack:
+//                    f = EaseOutBack;
+//                    break;
+//                case EaseType.easeInOutBack:
+//                    f = EaseInOutBack;
+//                    break;
+//                case EaseType.easeInElastic:
+//                    f = EaseInElastic;
+//                    break;
+//                case EaseType.easeOutElastic:
+//                    f = EaseOutElastic;
+//                    break;
+//                case EaseType.easeInOutElastic:
+//                    f = EaseInOutElastic;
+//                    break;
+//                case EaseType.punch:
+//                    f = EasePunch;
+//                    break;
             }
             return f;
+        }
+
+        private static float easeInBounce(float start, float end, float value)
+        {
+            end -= start;
+            float d = 1f;
+            return end - easeOutBounce(0, end, d - value) + start;
+        }
+
+        private static float easeOutBounce(float start, float end, float value)
+        {
+            value /= 1f;
+            end -= start;
+            if (value < (1 / 2.75f))
+            {
+                return end * (7.5625f * value * value) + start;
+            }
+            else if (value < (2 / 2.75f))
+            {
+                value -= (1.5f / 2.75f);
+                return end * (7.5625f * (value) * value + .75f) + start;
+            }
+            else if (value < (2.5 / 2.75))
+            {
+                value -= (2.25f / 2.75f);
+                return end * (7.5625f * (value) * value + .9375f) + start;
+            }
+            else
+            {
+                value -= (2.625f / 2.75f);
+                return end * (7.5625f * (value) * value + .984375f) + start;
+            }
+        }
+
+        private static float EaseInOutBounce(float start, float end, float value, float duration)
+        {
+            end -= start;
+            float d = 1f;
+            if (value < d / 2) return easeInBounce(0, end, value * 2) * 0.5f + start;
+            else return easeOutBounce(0, end, value * 2 - d) * 0.5f + end * 0.5f + start;
         }
 
         /**
